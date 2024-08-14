@@ -1,0 +1,66 @@
+version: "3.9"
+services:
+  app:
+    platform: "linux/amd64"
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_CLIENTVAR: "clientvar"
+    working_dir: /app
+    ports:
+      - "3000:3000"
+    image: t3-app
+    env_file:
+      - .env
+    depends_on:
+      - db
+    profiles: [prod]
+    command: npm run start
+
+  app-dev:
+    platform: "linux/amd64"
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_CLIENTVAR: "clientvar"
+    working_dir: /app
+    ports:
+      - "3000:3000"
+    image: t3-app
+    env_file:
+      - .env
+    command: npm run dev
+    volumes:
+      - .:/app
+      - /app/node_modules
+    profiles: [dev]
+
+  db:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    env_file:
+      - .env
+
+  migrate:
+      build:
+        context: .
+        dockerfile: Dockerfile
+        target: builder
+      command: npm run db:push
+      env_file:
+        - .env
+      depends_on:
+        - db
+
+volumes:
+  postgres_data:
