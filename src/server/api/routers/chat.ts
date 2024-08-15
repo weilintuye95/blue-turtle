@@ -1,17 +1,13 @@
+import { desc, eq, type InferSelectModel } from "drizzle-orm";
 import { z } from "zod";
 
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 import { chats, messages } from "~/server/db/schema";
 
-export const chatRouter = createTRPCRouter({
-//   hello: publicProcedure
-//     .input(z.object({ text: z.string() }))
-//     .query(({ input }) => {
-//       return {
-//         greeting: `Hello ${input.text}`,
-//       };
-//     }),
+export type Chat = InferSelectModel<typeof chats>;
 
+
+export const chatRouter = createTRPCRouter({
   sendMessage: publicProcedure
     .input(z.object({ body: z.string().min(1), sender: z.enum(['user', 'ai']), chatId: z.string().min(1), userId: z.string().min(1) }))
     .mutation(async ({ ctx, input }) => {
@@ -20,22 +16,26 @@ export const chatRouter = createTRPCRouter({
         body: input.body,
         chatId: input.chatId,
         userId: input.userId
-      });
+      })
     }),
 
   newChat: publicProcedure
     .input(z.object({ userId: z.string().min(1) }))
     .mutation(async ({ ctx, input }) => {
-      await ctx.db.insert(chats).values({
+      const newChat = await ctx.db.insert(chats).values({
         userId: input.userId,
-      });
+      }).returning();
+      return newChat[0]
     }),
 
-//   getLatest: publicProcedure.query(async ({ ctx }) => {
-//     const post = await ctx.db.query.posts.findFirst({
-//       orderBy: (posts, { desc }) => [desc(posts.createdAt)],
-//     });
-
-//     return post ?? null;
-//   }),
+  getAllChats: publicProcedure
+    .input(z.object({ userId: z.string().min(1) }))
+    .query(async ({ ctx, input }) => {
+      const userChats: Chat[] = await ctx.db
+        .select()
+        .from(chats)
+        .where(eq(chats.userId, input.userId))
+        .orderBy(desc(chats.createdAt));
+      return userChats
+    }),
 });

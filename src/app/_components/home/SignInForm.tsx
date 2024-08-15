@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import React from "react";
+import { useUser } from "~/app/context/UserContext";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
@@ -10,6 +11,7 @@ import { trpc } from "~/utils/trpc";
 const SignInForm = () => {
   const router = useRouter();
   const useUserCreator = trpc.user.createOrReturnUser.useMutation();
+  const { saveUser } = useUser();
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -23,12 +25,10 @@ const SignInForm = () => {
       const user = await useUserCreator.mutateAsync({ username });
 
       if (user) {
-        // const searchParams = new URLSearchParams({ userId: user.id });
-        // router.push(`/chat?${searchParams.toString()}`);
-        router.push(`/chat/${user.username}`);
+        saveUser(user);
+        router.push(`/chat`);
       }
     } catch (error) {
-      // Handle any errors that occur during mutation
       console.error("Failed to create or return user:", error);
     }
   };

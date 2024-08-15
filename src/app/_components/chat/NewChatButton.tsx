@@ -1,18 +1,24 @@
 import React from "react";
 import { FilePenIcon } from "~/app/_icons/icons";
+import { useUser } from "~/app/context/UserContext";
 import { Button } from "~/components/ui/button";
-import type { User } from "~/server/api/routers/user";
 import { trpc } from "~/utils/trpc";
 
-const NewChatButton = (user: User) => {
+const NewChatButton = ({ setChatId }: { setChatId: (id: string) => void }) => {
+  const { user } = useUser();
   const useNewChatCreator = trpc.chat.newChat.useMutation();
   const handleClick = async () => {
-    try {
-      await useNewChatCreator.mutateAsync({
-        userId: user.id,
-      });
-    } catch (error) {
-      console.error(error);
+    if (user) {
+      try {
+        const newChat = await useNewChatCreator.mutateAsync({
+          userId: user.id,
+        });
+        if (newChat) {
+          setChatId(newChat.id);
+        }
+      } catch (error) {
+        console.error(error);
+      }
     }
   };
   return (
@@ -20,8 +26,11 @@ const NewChatButton = (user: User) => {
       onClick={handleClick}
       variant="ghost"
       className="p-0 hover:bg-white hover:text-slate-500"
+      disabled={!user}
     >
-      <FilePenIcon className="h-6 w-6" />
+      <FilePenIcon
+        className={`${user ? "text-black" : "text-gray-400"} h-6 w-6`}
+      />
     </Button>
   );
 };

@@ -8,7 +8,6 @@ import {
   pgTableCreator,
   uuid,
   timestamp,
-  varchar,
   text
 } from "drizzle-orm/pg-core";
 
@@ -19,23 +18,6 @@ import {
  * @see https://orm.drizzle.team/docs/goodies#multi-project-schema
  */
 export const createTable = pgTableCreator((name) => `${name}`);
-
-export const posts = createTable(
-  "post",
-  {
-    id: uuid("id").primaryKey(),
-    name: varchar("name", { length: 256 }),
-    createdAt: timestamp("created_at", { withTimezone: true })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-    updatedAt: timestamp("updated_at", { withTimezone: true }).$onUpdate(
-      () => new Date()
-    ),
-  },
-  (table) => ({
-    nameIndex: index("name_idx").on(table.name),
-  })
-);
 
 export const users = createTable('users', {
   id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
