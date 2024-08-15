@@ -5,6 +5,7 @@ import { type Metadata } from "next";
 
 import { TRPCReactProvider } from "~/trpc/react";
 import { UserProvider } from "./context/UserContext";
+import { ChatProvider } from "./context/ChatIdContext";
 
 export const metadata: Metadata = {
   title: "Blue Turtle",
@@ -19,7 +20,9 @@ export default function RootLayout({
     <html lang="en" className={`${GeistSans.variable}`}>
       <body>
         <TRPCReactProvider>
-          <UserProvider>{children}</UserProvider>
+          <UserProvider>
+            <ChatProvider>{children}</ChatProvider>
+          </UserProvider>
         </TRPCReactProvider>
       </body>
     </html>

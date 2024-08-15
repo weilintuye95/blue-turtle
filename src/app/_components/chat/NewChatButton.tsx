@@ -4,7 +4,11 @@ import { useUser } from "~/app/context/UserContext";
 import { Button } from "~/components/ui/button";
 import { trpc } from "~/utils/trpc";
 
-const NewChatButton = ({ setChatId }: { setChatId: (id: string) => void }) => {
+const NewChatButton = ({
+  setChatId,
+}: {
+  setChatId: (id: string) => Promise<void>;
+}) => {
   const { user } = useUser();
   const useNewChatCreator = trpc.chat.newChat.useMutation();
   const handleClick = async () => {
@@ -14,7 +18,7 @@ const NewChatButton = ({ setChatId }: { setChatId: (id: string) => void }) => {
           userId: user.id,
         });
         if (newChat) {
-          setChatId(newChat.id);
+          await setChatId(newChat.id);
         }
       } catch (error) {
         console.error(error);
@@ -25,7 +29,7 @@ const NewChatButton = ({ setChatId }: { setChatId: (id: string) => void }) => {
     <Button
       onClick={handleClick}
       variant="ghost"
-      className="p-0 hover:bg-white hover:text-slate-500"
+      className="bg-gray-100 p-2 text-black hover:bg-gray-200"
       disabled={!user}
     >
       <FilePenIcon

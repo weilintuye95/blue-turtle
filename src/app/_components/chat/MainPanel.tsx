@@ -30,7 +30,7 @@ const MainPanel = () => {
         </div>
       </div>
       <footer className="flex items-center border-t p-4">
-        <MessageInput />
+        <MessageInput chatId={chatId} />
       </footer>
     </main>
   );
