@@ -6,26 +6,26 @@ import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { trpc } from "~/utils/trpc";
 
-import { useUser } from "~/app/context/UserContext";
+import { useUserContext } from "~/app/context/UserContext";
+import { useChatContext } from "~/app/context/ChatContext";
 
-const MessageInput = ({ chatId }: { chatId: string }) => {
-  const useMessageSender = trpc.chat.sendMessage.useMutation();
+const MessageInput = () => {
+  const useMessageSender = trpc.message.createMessage.useMutation();
 
   const [message, setMessage] = useState("");
 
-  const { user } = useUser();
-
+  const { user } = useUserContext();
+  const { chat } = useChatContext();
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (user && chatId) {
+    if (user && chat) {
       await useMessageSender.mutateAsync({
-        chatId: chatId,
+        chatId: chat.id,
         sender: "user",
         body: message,
         userId: user.id,
       });
-      console.log(message);
     } else {
       // this would be handled more gracefully for prod (e.g. maybe a note saying something went wrong)
       throw Error("No user or chat id associated with the message");
@@ -39,7 +39,6 @@ const MessageInput = ({ chatId }: { chatId: string }) => {
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setMessage(event.target.value);
-    console.log(message);
   };
 
   return (

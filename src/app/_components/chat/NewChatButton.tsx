@@ -1,16 +1,17 @@
 import React from "react";
 import { FilePenIcon } from "~/app/_icons/icons";
-import { useUser } from "~/app/context/UserContext";
+import { useChatContext } from "~/app/context/ChatContext";
+import { useUserContext } from "~/app/context/UserContext";
 import { Button } from "~/components/ui/button";
 import { trpc } from "~/utils/trpc";
 
-const NewChatButton = ({
-  setChatId,
-}: {
-  setChatId: (id: string) => Promise<void>;
+const NewChatButton: React.FC<{ refetchUserChats: () => void }> = ({
+  refetchUserChats,
 }) => {
-  const { user } = useUser();
-  const useNewChatCreator = trpc.chat.newChat.useMutation();
+  const { saveChat } = useChatContext();
+
+  const { user } = useUserContext();
+  const useNewChatCreator = trpc.chat.createChat.useMutation();
   const handleClick = async () => {
     if (user) {
       try {
@@ -18,7 +19,8 @@ const NewChatButton = ({
           userId: user.id,
         });
         if (newChat) {
-          await setChatId(newChat.id);
+          saveChat(newChat);
+          refetchUserChats();
         }
       } catch (error) {
         console.error(error);

@@ -1,18 +1,19 @@
 "use client";
-
 import React, {
   createContext,
   useContext,
+  useEffect,
   useState,
   type ReactNode,
 } from "react";
 
-import type { User } from "~/server/api/routers/user";
+import { type User } from "~/server/api/routers/user";
 
 interface UserContextType {
   user: User | null;
   saveUser: (user: User) => void;
 }
+
 interface UserProviderProps {
   children: ReactNode;
 }
@@ -24,7 +25,15 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
 
   const saveUser = (userData: User) => {
     setUser(userData);
+    sessionStorage.setItem("user_context", JSON.stringify(userData));
   };
+
+  useEffect(() => {
+    const storedUser = sessionStorage.getItem("user_context");
+    if (storedUser) {
+      setUser(JSON.parse(storedUser) as User);
+    }
+  }, []);
 
   return (
     <UserContext.Provider value={{ user, saveUser }}>
@@ -33,7 +42,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   );
 };
 
-export const useUser = (): UserContextType => {
+export const useUserContext = (): UserContextType => {
   const context = useContext(UserContext);
   if (!context) {
     throw new Error("useUser must be used within a UserProvider");

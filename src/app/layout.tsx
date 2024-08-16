@@ -5,7 +5,7 @@ import { type Metadata } from "next";
 
 import { TRPCReactProvider } from "~/trpc/react";
 import { UserProvider } from "./context/UserContext";
-import { ChatProvider } from "./context/ChatIdContext";
+import { ChatProvider } from "./context/ChatContext";
 
 export const metadata: Metadata = {
   title: "Blue Turtle",

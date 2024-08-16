@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import React from "react";
-import { useUser } from "~/app/context/UserContext";
+import { useUserContext } from "~/app/context/UserContext";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
@@ -11,7 +11,7 @@ import { trpc } from "~/utils/trpc";
 const SignInForm = () => {
   const router = useRouter();
   const useUserCreator = trpc.user.createOrReturnUser.useMutation();
-  const { saveUser } = useUser();
+  const { saveUser } = useUserContext();
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();

@@ -6,7 +6,7 @@ type QueryTextBoxProps = {
 
 const QueryTextBox: React.FC<QueryTextBoxProps> = ({ text }) => {
   return (
-    <div className="bg-muted text-muted-foreground max-w-[75%] self-end rounded-lg px-4 py-2">
+    <div className="max-w-[75%] self-end rounded-lg bg-muted px-4 py-2 text-muted-foreground">
       <div className="flex items-center space-x-2">
         <p>{text}</p>
       </div>

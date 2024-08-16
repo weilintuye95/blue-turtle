@@ -1,17 +1,17 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useUser } from "~/app/context/UserContext";
+import { useUserContext } from "~/app/context/UserContext";
+import { useChatContext } from "~/app/context/ChatContext";
 import { Button } from "~/components/ui/button";
 import { trpc } from "~/utils/trpc";
 import NewChatButton from "./NewChatButton";
 
 const Sidebar: React.FC = () => {
-  const { user } = useUser();
-  const [chatId, setChatId] = useState<string | null>(null);
+  const { user } = useUserContext();
+  const { chat, saveChat } = useChatContext();
   const [isCreatingChat, setIsCreatingChat] = useState(false);
 
-  // This component is gnarly, so providing some comments for understanding
   // Fetch all chats for the user and provide a refetch function
   const { data: allUserChats, refetch: refetchUserChats } =
     trpc.chat.getAllChats.useQuery(
@@ -19,11 +19,11 @@ const Sidebar: React.FC = () => {
       { enabled: !!user },
     );
 
-  // define create mutation hook that can be used to create a new chat
-  const useNewChatCreator = trpc.chat.newChat.useMutation({
+  // Define create mutation hook that can be used to create a new chat
+  const useNewChatCreator = trpc.chat.createChat.useMutation({
     onSuccess: async (newChat) => {
       if (newChat) {
-        setChatId(newChat.id);
+        saveChat(newChat);
         await refetchUserChats();
       }
     },
@@ -32,34 +32,32 @@ const Sidebar: React.FC = () => {
     },
   });
 
-  // Create a new chat on component mount if chatId is not set (so
-  // users can start chatting immediately)
+  // Logic to handle the creation of a new chat or selecting the latest chat
   useEffect(() => {
-    const createNewChat = async () => {
-      if (!chatId && user && !isCreatingChat) {
+    const handleChatLogic = async () => {
+      if (user && !isCreatingChat && allUserChats?.length === 0) {
         setIsCreatingChat(true);
         try {
           await useNewChatCreator.mutateAsync({ userId: user.id });
         } catch (error) {
-          console.error("Failed to create a new chat:", error);
+          console.error("Failed to handle chat logic:", error);
         } finally {
           setIsCreatingChat(false);
+        }
+      } else if (user && allUserChats && allUserChats.length > 0 && !chat) {
+        if (allUserChats[0]) {
+          saveChat(allUserChats[0]);
         }
       }
     };
 
-    void createNewChat();
-  }, [chatId, user, isCreatingChat, useNewChatCreator]);
+    void handleChatLogic();
+  }, [allUserChats, user, isCreatingChat, useNewChatCreator, saveChat, chat]);
 
   return (
     <aside className="flex w-64 flex-col justify-between bg-gray-100 p-4">
       <div>
-        <NewChatButton
-          setChatId={async (newChatId: string) => {
-            setChatId(newChatId);
-            await refetchUserChats(); // Pass in functional parameter. When button is clicked, refetch all chats so we can update sidebar
-          }}
-        />
+        <NewChatButton refetchUserChats={refetchUserChats} />
         <div className="mb-4 flex items-center justify-between"></div>
         <nav className="space-y-4">
           <div className="space-y-2">
@@ -68,7 +66,10 @@ const Sidebar: React.FC = () => {
               <ul className="space-y-1">
                 {allUserChats.map((chat) => (
                   <li key={chat.id}>
-                    <Button className="w-full bg-gray-100 text-black hover:bg-gray-200 focus:bg-gray-300">
+                    <Button
+                      onClick={() => saveChat(chat)}
+                      className="w-full bg-gray-100 text-black hover:bg-gray-200 focus:bg-gray-300"
+                    >
                       {chat.createdAt.toUTCString().slice(0, -4)}
                     </Button>
                   </li>

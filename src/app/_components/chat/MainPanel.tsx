@@ -5,10 +5,16 @@ import React from "react";
 import QueryTextBox from "./QueryTestBox";
 import ReplyTextBox from "./ReplyTextBox";
 import MessageInput from "./MessageInput";
-import { useUser } from "~/app/context/UserContext";
-
+import { useUserContext } from "~/app/context/UserContext";
+import { useChatContext } from "~/app/context/ChatContext";
+import { trpc } from "~/utils/trpc";
 const MainPanel = () => {
-  const { user } = useUser();
+  const { user } = useUserContext();
+  const { chat } = useChatContext();
+
+  const { data: allMessages } = trpc.message.getAllMessages.useQuery({
+    chatId: chat?.id ?? "",
+  });
   return (
     <main className="flex flex-1 flex-col">
       <header className="flex items-center justify-between border-b p-4">
@@ -18,19 +24,18 @@ const MainPanel = () => {
       <div className="flex flex-1 flex-col items-center justify-center space-y-4 p-4">
         <div className="flex flex-1 flex-col space-y-4 p-4">
           <div className="flex flex-col items-start space-y-2">
-            <QueryTextBox text="Hello" />
-            <ReplyTextBox text="Hi, how are you?" />
-
-            <QueryTextBox text="What's the weather today?" />
-            <ReplyTextBox
-              text="The weather today is sunny with a chance of meatballs, so
-                prepare a big umbrella"
-            />
+            {allMessages?.map((message) =>
+              message.sender === "user" ? (
+                <QueryTextBox key={message.id} text={message.body} />
+              ) : (
+                <ReplyTextBox key={message.id} text={message.body} />
+              ),
+            )}
           </div>
         </div>
       </div>
       <footer className="flex items-center border-t p-4">
-        <MessageInput chatId={chatId} />
+        <MessageInput />
       </footer>
     </main>
   );
