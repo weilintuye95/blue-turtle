@@ -4,8 +4,8 @@ import React, { useEffect, useState } from "react";
 import { useUserContext } from "~/app/context/UserContext";
 import { useChatContext } from "~/app/context/ChatContext";
 import { Button } from "~/components/ui/button";
-import { trpc } from "~/utils/trpc";
 import NewChatButton from "./NewChatButton";
+import { api } from "~/trpc/react";
 
 const Sidebar: React.FC = () => {
   const { user } = useUserContext();
@@ -14,13 +14,13 @@ const Sidebar: React.FC = () => {
 
   // Fetch all chats for the user and provide a refetch function
   const { data: allUserChats, refetch: refetchUserChats } =
-    trpc.chat.getAllChats.useQuery(
+    api.chat.getAllChats.useQuery(
       { userId: user?.id ?? "" },
       { enabled: !!user },
     );
 
   // Define create mutation hook that can be used to create a new chat
-  const useNewChatCreator = trpc.chat.createChat.useMutation({
+  const useNewChatCreator = api.chat.createChat.useMutation({
     onSuccess: async (newChat) => {
       if (newChat) {
         saveChat(newChat);

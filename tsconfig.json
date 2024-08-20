@@ -19,6 +19,7 @@
     "noEmit": true,
     "module": "ESNext",
     "moduleResolution": "Bundler",
+    "outDir": "build",
     "jsx": "preserve",
     "plugins": [{ "name": "next" }],
     "incremental": true,

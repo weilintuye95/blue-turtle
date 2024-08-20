@@ -4,18 +4,18 @@ import React, { useState } from "react";
 import { SendIcon } from "~/app/_icons/icons";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
-import { trpc } from "~/utils/trpc";
-
 import { useUserContext } from "~/app/context/UserContext";
 import { useChatContext } from "~/app/context/ChatContext";
+import { api } from "~/trpc/react";
 
 const MessageInput = () => {
-  const useMessageSender = trpc.message.createMessage.useMutation();
-
   const [message, setMessage] = useState("");
 
   const { user } = useUserContext();
   const { chat } = useChatContext();
+
+  const useMessageSender = api.message.createMessage.useMutation();
+
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 

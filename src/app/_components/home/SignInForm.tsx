@@ -6,11 +6,11 @@ import { useUserContext } from "~/app/context/UserContext";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
-import { trpc } from "~/utils/trpc";
+import { api } from "~/trpc/react";
 
 const SignInForm = () => {
   const router = useRouter();
-  const useUserCreator = trpc.user.createOrReturnUser.useMutation();
+  const useUserCreator = api.user.createOrReturnUser.useMutation();
   const { saveUser } = useUserContext();
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {

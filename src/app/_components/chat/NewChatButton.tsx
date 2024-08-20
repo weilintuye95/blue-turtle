@@ -3,15 +3,14 @@ import { FilePenIcon } from "~/app/_icons/icons";
 import { useChatContext } from "~/app/context/ChatContext";
 import { useUserContext } from "~/app/context/UserContext";
 import { Button } from "~/components/ui/button";
-import { trpc } from "~/utils/trpc";
-
+import { api } from "~/trpc/react";
 const NewChatButton: React.FC<{ refetchUserChats: () => void }> = ({
   refetchUserChats,
 }) => {
   const { saveChat } = useChatContext();
 
   const { user } = useUserContext();
-  const useNewChatCreator = trpc.chat.createChat.useMutation();
+  const useNewChatCreator = api.chat.createChat.useMutation();
   const handleClick = async () => {
     if (user) {
       try {
